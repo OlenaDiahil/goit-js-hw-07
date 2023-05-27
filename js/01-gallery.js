@@ -17,7 +17,13 @@ const makeGalleryEl = galleryItems.map(({ preview, original, description }) => `
 
 galleryEl.insertAdjacentHTML("beforeend", makeGalleryEl);
 
-let openModalInstance = null;
+let instance
+
+function handleGalleryKeydown (e) {
+  if (e.key === 'Escape') {
+    instance.close();
+  }
+}
 
 function handleGalleryClick(e) {
   e.preventDefault();
@@ -27,22 +33,17 @@ function handleGalleryClick(e) {
   const largeImageSrc = e.target.dataset.source;
   const largeImageAlt = e.target.getAttribute("alt");
 
-  const instance = basicLightbox.create(
-    `<img src="${largeImageSrc}" alt="${largeImageAlt}"/>`
+  instance = basicLightbox.create(
+    `<img src="${largeImageSrc}" alt="${largeImageAlt}"/>`,{
+      onShow: () => {
+        document.addEventListener('keydown', handleGalleryKeydown);
+      },
+      onClose: () => {
+        document.removeEventListener('keydown', handleGalleryKeydown);
+      }
+    }
   ); 
-
-  openModalInstance = instance;
-  
   instance.show();
 }
 
-function handleGalleryKeydown (e) {
-  if (e.key === 'Escape' && openModalInstance !== null) {
-    openModalInstance.close();
-    openModalInstance = null; 
-  }
-}
-
 galleryEl.addEventListener('click', handleGalleryClick);
-
-document.addEventListener('keydown', handleGalleryKeydown);
